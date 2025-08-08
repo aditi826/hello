@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResearchConnect AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            max-height: 800px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 24px;
+            flex-shrink: 0;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .header-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header-text p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: #f9fafb;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+
+        .avatar.user {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .avatar.bot {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 16px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: #3b82f6;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot .message-bubble {
+            background: white;
+            color: #374151;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            white-space: pre-line;
+        }
+
+        /* Suggestions */
+        .suggestions {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .suggestion-btn {
+            padding: 6px 12px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .suggestion-btn:hover {
+            background: #bfdbfe;
+            transform: translateY(-1px);
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            padding: 16px 24px;
+            background: #f3f4f6;
+            border-top: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+        }
+
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .quick-action-btn:hover {
+            background: #f8fafc;
+            border-color: #3b82f6;
+            transform: translateY(-1px);
+        }
+
+        .quick-action-btn .icon {
+            font-size: 16px;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 20px 24px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            min-height: 48px;
+            max-height: 120px;
+        }
+
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .send-btn {
+            padding: 12px 16px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            height: 48px;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Footer Stats */
+        .footer-stats {
+            background: #f9fafb;
+            padding: 16px 24px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .stat-item .icon {
+            font-size: 16px;
+        }
+
+        /* Scrollbar */
+        .chat-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-area::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .chat-area::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .chat-area::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                height: 100vh;
+                max-height: none;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+            
+            .quick-actions-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-icon">🤖</div>
+                <div class="header-text">
+                    <h1>ResearchConnect AI Assistant</h1>
+                    <p>Your intelligent guide to connecting with researchers</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area" id="chatArea">
+            <!-- Messages will be populated here -->
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="quick-actions-grid" id="quickActionsGrid">
+                <!-- Quick actions will be populated here -->
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <div class="input-container">
+                <textarea 
+                    id="messageInput" 
+                    class="input-field" 
+                    placeholder="Ask me anything about ResearchConnect..."
+                    rows="1"
+                ></textarea>
+                <button id="sendBtn" class="send-btn">
+                    <span>➤</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer Stats -->
+        <div class="footer-stats">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="icon">👥</span>
+                    <span>1000+ Researchers</span>
+                </div>
+                <div class="stat-item">
+                    <span class="icon">⭐</span>
+                    <span>95% Success Rate</span>
+                </div>
+                <div class="stat-item">
+                    <span class="icon">🛡️</span>
+                    <span>Secure & Verified</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        class AIAssistant {
+            constructor() {
+                this.messages = [
+                    {
+                        id: 1,
+                        sender: 'bot',
+                        text: "Hello! I'm your ResearchConnect AI Assistant. I can help you connect with researchers, understand our platform, assist with registration, and answer any questions about hiring researchers for your startup. How can I assist you today?",
+                        timestamp: new Date()
+                    }
+                ];
+                this.messageIdCounter = 2;
+                this.isTyping = false;
+                this.userProfile = {
+                    isRegistered: false,
+                    interests: [],
+                    previousQueries: []
+                };
+
+                this.platformKnowledge = {
+                    registration: {
+                        requirements: ['PAN Card', 'Photo ID', 'Valid email', 'Phone number'],
+                        process: 'Upload PAN card and photo → Verify details → Account activation → Profile setup',
+                        benefits: 'Access to verified researchers, secure payments, project management tools'
+                    },
+                    researchers: {
+                        categories: ['Data Science', 'AI/ML', 'Biotechnology', 'Engineering', 'Economics', 'Social Sciences', 'Market Research'],
+                        verification: 'All researchers are verified with academic credentials and work history',
+                        matching: 'AI-powered matching based on project requirements and researcher expertise'
+                    },
+                    features: {
+                        efficiency: 'Streamlined hiring process, project tracking, milestone management',
+                        security: 'Secure payments, NDA templates, IP protection',
+                        support: '24/7 support, dedicated project managers for large projects'
+                    },
+                    pricing: {
+                        model: 'Pay per project or hourly rates',
+                        ranges: 'Starting from ₹500/hour for junior researchers to ₹5000/hour for senior experts',
+                        commission: '10% platform fee on successful project completion'
+                    }
+                };
+
+                this.init();
+            }
+
+            // Intent Classification
+            classifyIntent(text) {
+                const normalizedText = text.toLowerCase();
+                
+                if (normalizedText.includes('register') || normalizedText.includes('sign up') || 
+                    normalizedText.includes('pan') || normalizedText.includes('photo')) {
+                    return 'registration';
+                }
+                if (normalizedText.includes('researcher') || normalizedText.includes('hire') || 
+                    normalizedText.includes('find')) {
+                    return 'findResearcher';
+                }
+                if (normalizedText.includes('price') || normalizedText.includes('cost') || 
+                    normalizedText.includes('fee') || normalizedText.includes('pricing')) {
+                    return 'pricing';
+                }
+                if (normalizedText.includes('feature') || normalizedText.includes('how') || 
+                    normalizedText.includes('what')) {
+                    return 'features';
+                }
+                if (normalizedText.includes('hello') || normalizedText.includes('hi') || 
+                    normalizedText.includes('help')) {
+                    return 'greeting';
+                }
+                return 'general';
+            }
+
+            // Entity Extraction
+            extractEntities(text) {
+                const entities = {};
+                this.platformKnowledge.researchers.categories.forEach(category => {
+                    if (text.toLowerCase().includes(category.toLowerCase())) {
+                        entities.researchArea = category;
+                    }
+                });
+                return entities;
+            }
+
+            // Response Generation
+            generateResponse(action, perception) {
+                const responses = {
+                    guideRegistration: `To register on ResearchConnect, you'll need:
+
+📋 **Requirements:**
+• PAN Card (clear photo/scan)
+• Photo ID proof
+• Valid email address
+• Phone number for verification
+
+📝 **Process:**
+1. Upload your PAN card and photo
+2. Fill in basic details
+3. Email & phone verification
+4. Account activation (24-48 hours)
+5. Complete your startup profile
+
+✅ **Benefits after registration:**
+• Access to 1000+ verified researchers
+• Secure payment system
+• Project management tools
+• 24/7 support
+
+Would you like me to guide you through any specific step?`,
+
+                    researcherSearch: `I can help you find the perfect researcher! 
+
+🔍 **Available Research Areas:**
+${this.platformKnowledge.researchers.categories.map(cat => `• ${cat}`).join('\n')}
+
+📊 **Our Matching Process:**
+• AI-powered skill matching
+• Experience level filtering
+• Budget compatibility
+• Timeline alignment
+• Previous project reviews
+
+${perception.entities.researchArea ? `Great! I see you're interested in ${perception.entities.researchArea}. ` : ''}
+
+What type of research project do you need help with? Please share:
+• Research area/domain
+• Project timeline
+• Budget range
+• Specific requirements`,
+
+                    providePricing: `💰 **ResearchConnect Pricing:**
+
+**Hourly Rates:**
+• Junior Researchers: ₹500-1,500/hour
+• Mid-level Researchers: ₹1,500-3,000/hour  
+• Senior Experts: ₹3,000-5,000/hour
+• Industry Specialists: ₹5,000+/hour
+
+**Platform Fee:** 10% on project completion
+
+**Payment Options:**
+• Milestone-based payments
+• Hourly billing
+• Fixed project cost
+
+**Additional Benefits:**
+• Secure escrow system
+• Money-back guarantee
+• Free project revisions (terms apply)
+
+Need a custom quote for your specific project?`,
+
+                    explainFeatures: `🚀 **ResearchConnect Platform Features:**
+
+**🔒 Security & Trust:**
+• Verified researchers with academic credentials
+• Secure payment escrow system
+• NDA templates & IP protection
+• Background verification
+
+**⚡ Efficiency Tools:**
+• AI-powered researcher matching
+• Project milestone tracking
+• Real-time communication tools
+• Progress reporting dashboard
+
+**🎯 Quality Assurance:**
+• Peer review system
+• Quality scoring algorithms
+• Revision management
+• Satisfaction guarantees
+
+**📞 Support:**
+• 24/7 customer support
+• Dedicated project managers
+• Technical assistance
+• Dispute resolution
+
+Which feature would you like to know more about?`,
+
+                    welcomeUser: `Welcome to ResearchConnect! 🎉
+
+I'm here to help you navigate our platform and connect with the right researchers for your startup needs.
+
+**Popular actions:**
+• Find researchers in your domain
+• Learn about registration process
+• Get pricing information
+• Understand platform features
+
+**Quick Stats:**
+• 1000+ verified researchers
+• 95% project success rate
+• Average matching time: 24 hours
+• Serving 500+ startups
+
+What would you like to explore first?`,
+
+                    generalHelp: `I'm here to help with anything related to ResearchConnect! 
+
+**I can assist you with:**
+• 👥 Finding and hiring researchers
+• 📝 Registration and account setup  
+• 💰 Pricing and payment information
+• 🔧 Platform features and tools
+• 📞 Support and troubleshooting
+• 📊 Project management guidance
+
+Could you please be more specific about what you'd like to know?`
+                };
+
+                return responses[action] || responses.generalHelp;
+            }
+
+            // Generate Suggestions
+            generateSuggestions(response) {
+                if (response.includes('registration')) {
+                    return ['Start Registration', 'Upload Documents', 'Verify Account'];
+                }
+                if (response.includes('researcher')) {
+                    return ['Browse Researchers', 'Post Project', 'Get Matched'];
+                }
+                if (response.includes('pricing')) {
+                    return ['Get Quote', 'Compare Plans', 'Payment Options'];
+                }
+                return ['Browse Researchers', 'Learn More', 'Get Started'];
+            }
+
+            // AI Agent Processing
+            processMessage(userInput) {
+                try {
+                    // Perception
+                    const intent = this.classifyIntent(userInput);
+                    const entities = this.extractEntities(userInput);
+                    const perception = { intent, entities, originalText: userInput };
+
+                    // Planning
+                    let action, priority;
+                    switch (intent) {
+                        case 'registration':
+                            action = 'guideRegistration';
+                            priority = 'high';
+                            break;
+                        case 'findResearcher':
+                            action = 'researcherSearch';
+                            priority = 'high';
+                            break;
+                        case 'pricing':
+                            action = 'providePricing';
+                            priority = 'medium';
+                            break;
+                        case 'features':
+                            action = 'explainFeatures';
+                            priority = 'medium';
+                            break;
+                        case 'greeting':
+                            action = 'welcomeUser';
+                            priority = 'low';
+                            break;
+                        default:
+                            action = 'generalHelp';
+                            priority = 'medium';
+                    }
+
+                    // Action
+                    const response = this.generateResponse(action, perception);
+                    const suggestions = this.generateSuggestions(response);
+
+                    // Learning
+                    this.userProfile.previousQueries.push({
+                        input: userInput,
+                        intent: intent,
+                        timestamp: new Date()
+                    });
+
+                    // Keep only last 5 queries
+                    if (this.userProfile.previousQueries.length > 5) {
+                        this.userProfile.previousQueries = this.userProfile.previousQueries.slice(-5);
+                    }
+
+                    return {
+                        text: response,
+                        suggestions: suggestions
+                    };
+                } catch (error) {
+                    console.error('Error processing message:', error);
+                    return {
+                        text: "I apologize, but I encountered an error processing your request. Please try again or contact support.",
+                        suggestions: ['Try Again', 'Contact Support']
+                    };
+                }
+            }
+
+            // UI Methods
+            renderMessages() {
+                const chatArea = document.getElementById('chatArea');
+                chatArea.innerHTML = '';
+
+                this.messages.forEach(message => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${message.sender}`;
+
+                    const avatar = document.createElement('div');
+                    avatar.className = `avatar ${message.sender}`;
+                    avatar.textContent = message.sender === 'user' ? '👤' : '🤖';
+
+                    const bubble = document.createElement('div');
+                    bubble.className = 'message-bubble';
+                    bubble.textContent = message.text;
+
+                    // Add suggestions if present
+                    if (message.suggestions && message.suggestions.length > 0) {
+                        const suggestionsDiv = document.createElement('div');
+                        suggestionsDiv.className = 'suggestions';
+                        
+                        message.suggestions.forEach(suggestion => {
+                            const btn = document.createElement('button');
+                            btn.className = 'suggestion-btn';
+                            btn.textContent = suggestion;
+                            btn.addEventListener('click', () => this.handleSuggestionClick(suggestion));
+                            suggestionsDiv.appendChild(btn);
+                        });
+                        
+                        bubble.appendChild(suggestionsDiv);
+                    }
+
+                    messageDiv.appendChild(avatar);
+                    messageDiv.appendChild(bubble);
+                    chatArea.appendChild(messageDiv);
+                });
+
+                // Scroll to bottom
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+
+            showTypingIndicator() {
+                const chatArea = document.getElementById('chatArea');
+                
+                const typingDiv = document.createElement('div');
+                typingDiv.id = 'typingIndicator';
+                typingDiv.className = 'message bot';
+
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar bot';
+                avatar.textContent = '🤖';
+
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble';
+                
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'typing-indicator';
+                typingIndicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+                
+                bubble.appendChild(typingIndicator);
+                typingDiv.appendChild(avatar);
+                typingDiv.appendChild(bubble);
+                chatArea.appendChild(typingDiv);
+
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+
+            hideTypingIndicator() {
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+
+            renderQuickActions() {
+                const quickActions = [
+                    { icon: '👥', text: 'Find Researchers', action: 'findResearcher' },
+                    { icon: '📝', text: 'Registration Help', action: 'registration' },
+                    { icon: '⭐', text: 'Platform Features', action: 'features' },
+                    { icon: '💳', text: 'Pricing Info', action: 'pricing' }
+                ];
+
+                const grid = document.getElementById('quickActionsGrid');
+                grid.innerHTML = '';
+
+                quickActions.forEach(action => {
+                    const btn = document.createElement('button');
+                    btn.className = 'quick-action-btn';
+                    btn.innerHTML = `<span class="icon">${action.icon}</span><span>${action.text}</span>`;
+                    btn.addEventListener('click', () => this.handleQuickAction(action.action));
+                    grid.appendChild(btn);
+                });
+            }
+
+            // Event Handlers
+            handleSendMessage() {
+                const input = document.getElementById('messageInput');
+                const messageText = input.value.trim();
+                
+                if (!messageText || this.isTyping) return;
+
+                // Add user message
+                this.messages.push({
+                    id: this.messageIdCounter++,
+                    sender: 'user',
+                    text: messageText,
+                    timestamp: new Date()
+                });
+
+                input.value = '';
+                this.isTyping = true;
+                document.getElementById('sendBtn').disabled = true;
+
+                this.renderMessages();
+                this.showTypingIndicator();
+
+                // Simulate AI processing time
+                setTimeout(() => {
+                    try {
+                        const aiResponse = this.processMessage(messageText);
+                        
+                        this.hideTypingIndicator();
+                        
+                        this.messages.push({
+                            id: this.messageIdCounter++,
+                            sender: 'bot',
+                            text: aiResponse.text,
+                            suggestions: aiResponse.suggestions,
+                            timestamp: new Date()
+                        });
+
+                        this.renderMessages();
+                    } catch (error) {
+                        console.error('Error generating AI response:', error);
+                        this.hideTypingIndicator();
+                        
+                        this.messages.push({
+                            id: this.messageIdCounter++,
+                            sender: 'bot',
+                            text: "I apologize, but I encountered an error. Please try again.",
+                            timestamp: new Date()
+                        });
+                        
+                        this.renderMessages();
+                    } finally {
+                        this.isTyping = false;
+                        document.getElementById('sendBtn').disabled = false;
+                    }
+                }, 1000 + Math.random() * 1000); // 1-2 second delay
+            }
+
+            handleQuickAction(action) {
+                const actionMessages = {
+                    findResearcher: "I want to find a researcher for my project",
+                    registration: "How do I register on the platform?",
+                    features: "What are the platform features?",
+                    pricing: "What are your pricing plans?"
+                };
+                
+                const message = actionMessages[action] || "Help me with this";
+                const input = document.getElementById('messageInput');
+                input.value = message;
+                
+                setTimeout(() => this.handleSendMessage(), 100);
+            }
+
+            handleSuggestionClick(suggestion) {
+                const input = document.getElementById('messageInput');
+                input.value = suggestion;
+                setTimeout(() => this.handleSendMessage(), 100);
+            }
+
+            // Auto-resize textarea
+            autoResizeTextarea() {
+                const textarea = document.getElementById('messageInput');
+                textarea.style.height = 'auto';
+                textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+            }
+
+            // Initialize
+            init() {
+                this.renderMessages();
+                this.renderQuickActions();
+
+                // Event listeners
+                const sendBtn = document.getElementById('sendBtn');
+                const messageInput = document.getElementById('messageInput');
+
+                sendBtn.addEventListener('click', () => this.handleSendMessage());
+                
+                messageInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.handleSendMessage();
+                    }
+                });
+
+                messageInput.addEventListener('input', () => this.autoResizeTextarea());
+            }
+        }
+
+        // Initialize the AI Assistant when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new AIAssistant();
+        });
+    </script>
+</body>
+</html>
