@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-header {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .user-message {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message {
+            background: #f1f3f4;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .debug-info {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .send-button {
+            padding: 15px 25px;
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .debug-button {
+            padding: 10px 15px;
+            background: #ffc107;
+            color: #212529;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            background: #f1f3f4;
+            border-radius: 20px;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #666;
+            font-size: 18px;
+            margin: 50px 0;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .suggestion-chip {
+            padding: 8px 16px;
+            background: #e3f2fd;
+            color: #1976d2;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion-chip:hover {
+            background: #bbdefb;
+            transform: translateY(-1px);
+        }
+
+        .file-instructions {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px;
+            border-left: 4px solid #28a745;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            🤖 Personal AI Assistant
+            <div class="status-indicator" id="statusIndicator">Ready</div>
+        </div>
+
+        <div class="file-instructions">
+            <strong>📝 Instructions:</strong><br>
+            1. Create a file named <code>questions.json</code> in the same folder<br>
+            2. Add your questions and answers in the format shown below<br>
+            3. The AI will automatically load and use your questions<br>
+            <details style="margin-top: 10px;">
+                <summary>Click to see JSON format example</summary>
+                <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 10px; overflow-x: auto;">
+{
+  "greetings": {
+    "patterns": ["hello", "hi", "hey", "good morning"],
+    "responses": ["Hello! How can I help?", "Hi there!"]
+  },
+  "weather": {
+    "patterns": ["weather", "temperature", "how hot", "how cold"],
+    "responses": ["I don't have real-time weather data, but you can check your local weather app!"]
+  }
+}</pre>
+            </details>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-message">
+                <h3>Welcome to your Personal AI Assistant!</h3>
+                <p>Ask me anything and I'll try to help you.</p>
+                <div class="suggestion-chips">
+                    <button class="suggestion-chip" onclick="sendSuggestion('What can you help me with?')">What can you do?</button>
+                    <button class="suggestion-chip" onclick="sendSuggestion('How are you?')">How are you?</button>
+                    <button class="suggestion-chip" onclick="sendSuggestion('Tell me about yourself')">About you</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
+            <button class="send-button" id="sendButton" onclick="sendMessage()">Send</button>
+            <button class="debug-button" onclick="toggleDebug()">Debug</button>
+        </div>
+    </div>
+
+    <script>
+        // Default knowledge base (fallback if no external file)
+        let knowledgeBase = {
+            "greetings": {
+                "patterns": ["hello", "hi", "hey", "good morning", "good afternoon", "good evening", "greetings"],
+                "responses": [
+                    "Hello! How can I assist you today?",
+                    "Hi there! What can I help you with?",
+                    "Hey! I'm here to help. What's on your mind?",
+                    "Greetings! How may I be of service?"
+                ]
+            },
+            "how_are_you": {
+                "patterns": ["how are you", "how do you feel", "are you okay", "how's it going", "what's up"],
+                "responses": [
+                    "I'm doing great, thank you for asking! How are you?",
+                    "I'm functioning perfectly and ready to help! How about you?",
+                    "All systems running smoothly! What can I do for you today?",
+                    "I'm excellent, thanks! How can I assist you?"
+                ]
+            },
+            "capabilities": {
+                "patterns": ["what can you do", "help me", "your capabilities", "what are you capable of", "features"],
+                "responses": [
+                    "I can help you with various tasks including answering questions, providing information, and having conversations. What specific help do you need?",
+                    "I'm designed to assist with information, answer questions, and engage in helpful conversations. How can I help you today?",
+                    "My capabilities include answering questions, providing explanations, and helping with various topics. What would you like to know?"
+                ]
+            },
+            "identity": {
+                "patterns": ["who are you", "what are you", "tell me about yourself", "your name", "introduce yourself"],
+                "responses": [
+                    "I'm your personal AI assistant, designed to help answer questions and provide information on various topics.",
+                    "I'm an AI assistant created to help you with questions and conversations. Think of me as your digital helper!",
+                    "I'm your personal AI companion, here to assist with information, answer questions, and have meaningful conversations."
+                ]
+            },
+            "thanks": {
+                "patterns": ["thank you", "thanks", "appreciate it", "grateful", "thx"],
+                "responses": [
+                    "You're very welcome! Happy to help!",
+                    "My pleasure! Is there anything else I can assist you with?",
+                    "Glad I could help! Feel free to ask if you need anything else.",
+                    "You're welcome! I'm here whenever you need assistance."
+                ]
+            },
+            "goodbye": {
+                "patterns": ["bye", "goodbye", "see you later", "farewell", "take care"],
+                "responses": [
+                    "Goodbye! Have a wonderful day!",
+                    "See you later! Take care!",
+                    "Farewell! Feel free to come back anytime you need help.",
+                    "Bye! It was great chatting with you!"
+                ]
+            },
+            "default": {
+                "patterns": [],
+                "responses": [
+                    "I'm not sure I understand that completely. Could you rephrase your question?",
+                    "That's an interesting question! Could you provide a bit more context?",
+                    "I'd like to help, but I need a bit more information. Could you elaborate?",
+                    "I'm still learning! Could you ask that in a different way?"
+                ]
+            }
+        };
+
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const statusIndicator = document.getElementById('statusIndicator');
+
+        let debugMode = false;
+        let questionsLoaded = false;
+
+        // Load external questions file
+        async function loadQuestionsFile() {
+            try {
+                statusIndicator.textContent = 'Loading...';
+                const response = await fetch('./questions.json');
+                if (response.ok) {
+                    const externalQuestions = await response.json();
+                    knowledgeBase = { ...knowledgeBase, ...externalQuestions };
+                    statusIndicator.textContent = 'Custom Questions Loaded';
+                    statusIndicator.style.background = 'rgba(40, 167, 69, 0.3)';
+                    questionsLoaded = true;
+                    console.log('✅ External questions loaded successfully:', Object.keys(externalQuestions));
+                } else {
+                    throw new Error('File not found');
+                }
+            } catch (error) {
+                statusIndicator.textContent = 'Using Default Questions';
+                statusIndicator.style.background = 'rgba(255, 193, 7, 0.3)';
+                console.log('⚠️ Could not load questions.json, using default questions');
+                console.log('💡 Create a questions.json file to add your custom questions');
+            }
+        }
+
+        // Enhanced text normalization
+        function normalizeText(text) {
+            return text.toLowerCase()
+                      .trim()
+                      .replace(/[^\w\s]/g, ' ')
+                      .replace(/\s+/g, ' ')
+                      .trim();
+        }
+
+        // Calculate similarity score between two strings
+        function calculateSimilarity(str1, str2) {
+            const words1 = str1.split(' ');
+            const words2 = str2.split(' ');
+            
+            let matches = 0;
+            words1.forEach(word1 => {
+                words2.forEach(word2 => {
+                    if (word1 === word2 || 
+                        word1.includes(word2) || 
+                        word2.includes(word1) ||
+                        Math.abs(word1.length - word2.length) <= 2 && 
+                        levenshteinDistance(word1, word2) <= 2) {
+                        matches++;
+                    }
+                });
+            });
+            
+            return matches / Math.max(words1.length, words2.length);
+        }
+
+        // Levenshtein distance for fuzzy matching
+        function levenshteinDistance(str1, str2) {
+            const matrix = Array(str2.length + 1).fill().map(() => Array(str1.length + 1).fill(0));
+            
+            for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
+            for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+            
+            for (let j = 1; j <= str2.length; j++) {
+                for (let i = 1; i <= str1.length; i++) {
+                    const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                    matrix[j][i] = Math.min(
+                        matrix[j][i - 1] + 1,
+                        matrix[j - 1][i] + 1,
+                        matrix[j - 1][i - 1] + cost
+                    );
+                }
+            }
+            
+            return matrix[str2.length][str1.length];
+        }
+
+        // Improved pattern matching
+        function findBestResponse(userInput) {
+            const normalizedInput = normalizeText(userInput);
+            let bestMatch = null;
+            let bestScore = 0;
+            let matchedPattern = '';
+            let matchedCategory = '';
+
+            console.log('🔍 Searching for:', normalizedInput);
+
+            for (const [category, data] of Object.entries(knowledgeBase)) {
+                if (category === 'default') continue;
+
+                for (const pattern of data.patterns) {
+                    const normalizedPattern = normalizeText(pattern);
+                    
+                    // Direct substring match (highest priority)
+                    if (normalizedInput.includes(normalizedPattern) || normalizedPattern.includes(normalizedInput)) {
+                        const score = 1.0;
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestMatch = data.responses;
+                            matchedPattern = pattern;
+                            matchedCategory = category;
+                        }
+                    }
+                    
+                    // Similarity-based matching
+                    const similarity = calculateSimilarity(normalizedInput, normalizedPattern);
+                    if (similarity > 0.5 && similarity > bestScore) {
+                        bestScore = similarity;
+                        bestMatch = data.responses;
+                        matchedPattern = pattern;
+                        matchedCategory = category;
+                    }
+                }
+            }
+
+            if (bestMatch) {
+                const randomIndex = Math.floor(Math.random() * bestMatch.length);
+                const response = bestMatch[randomIndex];
+                
+                if (debugMode) {
+                    console.log('✅ Match found:', {
+                        category: matchedCategory,
+                        pattern: matchedPattern,
+                        score: bestScore,
+                        response: response
+                    });
+                }
+                
+                return {
+                    response: response,
+                    debug: debugMode ? `Matched "${matchedPattern}" in category "${matchedCategory}" (score: ${bestScore.toFixed(2)})` : null
+                };
+            }
+
+            // Default response
+            const defaultResponses = knowledgeBase.default.responses;
+            const randomIndex = Math.floor(Math.random() * defaultResponses.length);
+            
+            if (debugMode) {
+                console.log('❌ No match found, using default response');
+            }
+            
+            return {
+                response: defaultResponses[randomIndex],
+                debug: debugMode ? 'No pattern matched - using default response' : null
+            };
+        }
+
+        // Add message to chat
+        function addMessage(message, isUser = false, debugInfo = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+            messageDiv.textContent = message;
+            
+            if (debugInfo && debugMode) {
+                const debugDiv = document.createElement('div');
+                debugDiv.classList.add('debug-info');
+                debugDiv.textContent = `Debug: ${debugInfo}`;
+                messageDiv.appendChild(debugDiv);
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show/hide typing indicator
+        function showTyping() {
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        // Simulate thinking time
+        function simulateThinking() {
+            return new Promise(resolve => {
+                setTimeout(resolve, Math.random() * 1000 + 500);
+            });
+        }
+
+        // Send message
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            chatInput.value = '';
+            sendButton.disabled = true;
+
+            showTyping();
+            await simulateThinking();
+            hideTyping();
+
+            const result = findBestResponse(message);
+            addMessage(result.response, false, result.debug);
+
+            sendButton.disabled = false;
+            chatInput.focus();
+        }
+
+        // Handle suggestion clicks
+        function sendSuggestion(suggestion) {
+            chatInput.value = suggestion;
+            sendMessage();
+        }
+
+        // Handle Enter key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Toggle debug mode
+        function toggleDebug() {
+            debugMode = !debugMode;
+            const debugButton = document.querySelector('.debug-button');
+            debugButton.textContent = debugMode ? 'Debug ON' : 'Debug';
+            debugButton.style.background = debugMode ? '#dc3545' : '#ffc107';
+            
+            addMessage(`Debug mode ${debugMode ? 'enabled' : 'disabled'}. ${debugMode ? 'You\'ll now see matching information.' : ''}`, false);
+        }
+
+        // Remove welcome message after first interaction
+        let firstInteraction = true;
+        const originalSendMessage = sendMessage;
+        sendMessage = function() {
+            if (firstInteraction) {
+                const welcomeMessage = document.querySelector('.welcome-message');
+                if (welcomeMessage) {
+                    welcomeMessage.style.display = 'none';
+                }
+                firstInteraction = false;
+            }
+            originalSendMessage();
+        };
+
+        // Initialize
+        window.onload = function() {
+            loadQuestionsFile();
+            chatInput.focus();
+        };
+    </script>
+</body>
+</html>
