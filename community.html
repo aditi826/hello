@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabsLaunch Community</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a2b5c 0%, #2c4084 50%, #3d5499 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #8a9bff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #8a9bff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header-section h1 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #8a9bff, #b8c7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .search-bar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            color: #ffffff;
+            width: 100%;
+            max-width: 500px;
+            margin: 2rem auto;
+            display: block;
+        }
+
+        .search-bar::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .btn {
+            background: rgba(138, 155, 255, 0.2);
+            border: 1px solid #8a9bff;
+            color: #ffffff;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #8a9bff;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: #8a9bff;
+        }
+
+        .posts-container {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .post-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #8a9bff, #b8c7ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .post-info h3 {
+            color: #8a9bff;
+            margin-bottom: 0.2rem;
+        }
+
+        .post-meta {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .post-content {
+            margin: 1rem 0;
+        }
+
+        .post-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .post-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .tag {
+            background: rgba(138, 155, 255, 0.3);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #8a9bff;
+        }
+
+        .comments-section {
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 1rem;
+            display: none;
+        }
+
+        .comments-section.show {
+            display: block;
+        }
+
+        .comment {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .comment-profile {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #6c7bff, #9ca6ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .comment-form {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .comment-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 0.8rem;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+
+        .comment-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a2b5c 0%, #2c4084 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            color: #8a9bff;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 0.8rem;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .tab {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 0.7rem 1.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: #8a9bff;
+            border-color: #8a9bff;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header-section h1 {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .post-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">LabsLaunch</div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#paths">Paths</a>
+            <a href="#how-we-help">How We Help</a>
+            <a href="#innovation">Innovation</a>
+            <a href="#news">News</a>
+            <a href="#community" style="color: #8a9bff;">Community</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>Research Community</h1>
+            <p>Connect, collaborate, and share breakthrough research with the global innovation community</p>
+            
+            <input type="text" class="search-bar" id="searchInput" placeholder="Search for research topics, posts, or users...">
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="openNewPostModal()">Create New Post</button>
+            </div>
+        </div>
+
+        <div class="filter-tabs">
+            <div class="tab active" onclick="filterPosts('all')">All Posts</div>
+            <div class="tab" onclick="filterPosts('trending')">Trending</div>
+            <div class="tab" onclick="filterPosts('recent')">Recent</div>
+            <div class="tab" onclick="filterPosts('research')">Research</div>
+            <div class="tab" onclick="filterPosts('innovation')">Innovation</div>
+        </div>
+
+        <div class="posts-container" id="postsContainer">
+            <!-- Posts will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- New Post Modal -->
+    <div id="newPostModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('newPostModal')">&times;</button>
+            <h2>Create New Research Post</h2>
+            <form id="newPostForm">
+                <div class="form-group">
+                    <label for="postTitle">Post Title</label>
+                    <input type="text" id="postTitle" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postCategory">Category</label>
+                    <select id="postCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="research">Research Finding</option>
+                        <option value="innovation">Innovation Update</option>
+                        <option value="collaboration">Collaboration Opportunity</option>
+                        <option value="discussion">Discussion</option>
+                        <option value="announcement">Announcement</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postContent">Content</label>
+                    <textarea id="postContent" placeholder="Share your research findings, insights, or questions..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postTags">Tags (comma-separated)</label>
+                    <input type="text" id="postTags" placeholder="AI, machine learning, biotechnology...">
+                </div>
+                
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">Publish Post</button>
+                    <button type="button" class="btn" onclick="closeModal('newPostModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sample data structure for posts and users
+        let users = [
+            { id: 1, name: "Dr. Sarah Chen", avatar: "SC", institution: "MIT Research Lab", expertise: "AI & Machine Learning" },
+            { id: 2, name: "Prof. Michael Rodriguez", avatar: "MR", institution: "Stanford Bio Institute", expertise: "Biotechnology" },
+            { id: 3, name: "Dr. Emily Watson", avatar: "EW", institution: "Cambridge Innovation Hub", expertise: "Quantum Computing" },
+            { id: 4, name: "Dr. James Park", avatar: "JP", institution: "Harvard Medical School", expertise: "Medical Research" },
+            { id: 5, name: "Dr. Lisa Thompson", avatar: "LT", institution: "Oxford Tech Lab", expertise: "Nanotechnology" }
+        ];
+
+        let posts = [
+            {
+                id: 1,
+                userId: 1,
+                title: "Breakthrough in Neural Network Optimization",
+                content: "Our latest research has achieved a 40% improvement in training efficiency for large language models through novel optimization techniques. This could significantly reduce computational costs for AI development.",
+                category: "research",
+                tags: ["AI", "machine learning", "optimization", "neural networks"],
+                timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+                likes: 45,
+                comments: [
+                    { id: 1, userId: 2, content: "Fascinating work! Have you considered applications in protein folding predictions?", timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000) },
+                    { id: 2, userId: 3, content: "This could revolutionize quantum-classical hybrid algorithms. Would love to collaborate!", timestamp: new Date(Date.now() - 30 * 60 * 1000) }
+                ]
+            },
+            {
+                id: 2,
+                userId: 2,
+                title: "New Gene Therapy Approach Shows Promise",
+                content: "Early trials of our CRISPR-based gene therapy have shown remarkable success in treating inherited blindness. 8 out of 10 patients showed significant vision improvement.",
+                category: "research",
+                tags: ["biotechnology", "CRISPR", "gene therapy", "medical research"],
+                timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
+                likes: 67,
+                comments: [
+                    { id: 3, userId: 4, content: "Incredible results! What's the timeline for Phase 2 trials?", timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) }
+                ]
+            },
+            {
+                id: 3,
+                userId: 3,
+                title: "Quantum Supremacy in Cryptography",
+                content: "Our quantum computer has successfully broken RSA-2048 encryption in record time. This breakthrough has significant implications for cybersecurity and blockchain technologies.",
+                category: "innovation",
+                tags: ["quantum computing", "cryptography", "cybersecurity", "blockchain"],
+                timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000),
+                likes: 89,
+                comments: [
+                    { id: 4, userId: 1, content: "This is a game-changer! Are you working on quantum-resistant algorithms as well?", timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000) },
+                    { id: 5, userId: 5, content: "The implications for secure communications are enormous.", timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000) }
+                ]
+            }
+        ];
+
+        let currentUser = { id: 6, name: "You", avatar: "Y", institution: "Your Institution", expertise: "Your Field" };
+        let currentFilter = 'all';
+
+        function renderPosts(postsToRender = posts) {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '';
+
+            postsToRender.forEach(post => {
+                const user = users.find(u => u.id === post.userId);
+                const postElement = createPostElement(post, user);
+                container.appendChild(postElement);
+            });
+        }
+
+        function createPostElement(post, user) {
+            const postDiv = document.createElement('div');
+            postDiv.className = 'post-card';
+            postDiv.innerHTML = `
+                <div class="post-header">
+                    <div class="profile-pic">${user.avatar}</div>
+                    <div class="post-info">
+                        <h3>${user.name}</h3>
+                        <div class="post-meta">
+                            ${user.institution} • ${formatTimeAgo(post.timestamp)} • ID: ${String(post.id).padStart(4, '0')}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="post-content">
+                    <h2 class="post-title">${post.title}</h2>
+                    <p>${post.content}</p>
+                    
+                    <div class="post-tags">
+                        ${post.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+                
+                <div class="post-actions">
+                    <button class="action-btn" onclick="toggleLike(${post.id})">
+                        ❤️ ${post.likes} Likes
+                    </button>
+                    <button class="action-btn" onclick="toggleComments(${post.id})">
+                        💬 ${post.comments.length} Comments
+                    </button>
+                    <button class="action-btn" onclick="sharePost(${post.id})">
+                        🔗 Share
+                    </button>
+                </div>
+                
+                <div class="comments-section" id="comments-${post.id}">
+                    <div class="comments-list">
+                        ${post.comments.map(comment => createCommentElement(comment)).join('')}
+                    </div>
+                    <div class="comment-form">
+                        <input type="text" class="comment-input" placeholder="Add a comment..." 
+                               onkeypress="handleCommentSubmit(event, ${post.id})">
+                        <button class="btn" onclick="addComment(${post.id})">Post</button>
+                    </div>
+                </div>
+            `;
+            return postDiv;
+        }
+
+        function createCommentElement(comment) {
+            const user = users.find(u => u.id === comment.userId) || currentUser;
+            return `
+                <div class="comment">
+                    <div class="comment-header">
+                        <div class="comment-profile">${user.avatar}</div>
+                        <div>
+                            <strong>${user.name}</strong>
+                            <span class="post-meta">${formatTimeAgo(comment.timestamp)}</span>
+                        </div>
+                    </div>
+                    <p>${comment.content}</p>
+                </div>
+            `;
+        }
+
+        function formatTimeAgo(timestamp) {
+            const now = new Date();
+            const diff = now - timestamp;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor(diff / (1000 * 60));
+            
+            if (hours > 0) return `${hours}h ago`;
+            if (minutes > 0) return `${minutes}m ago`;
+            return 'Just now';
+        }
+
+        function openNewPostModal() {
+            document.getElementById('newPostModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function toggleComments(postId) {
+            const commentsSection = document.getElementById(`comments-${postId}`);
+            commentsSection.classList.toggle('show');
+        }
+
+        function toggleLike(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.likes += 1;
+                renderPosts(filterPostsByCategory(currentFilter));
+            }
+        }
+
+        function addComment(postId) {
+            const post = posts.find(p => p.id === postId);
+            const input = document.querySelector(`#comments-${postId} .comment-input`);
+            
+            if (post && input.value.trim()) {
+                const newComment = {
+                    id: Date.now(),
+                    userId: currentUser.id,
+                    content: input.value.trim(),
+                    timestamp: new Date()
+                };
+                
+                post.comments.push(newComment);
+                input.value = '';
+                renderPosts(filterPostsByCategory(currentFilter));
+            }
+        }
+
+        function handleCommentSubmit(event, postId) {
+            if (event.key === 'Enter') {
+                addComment(postId);
+            }
+        }
+
+        function filterPosts(category) {
+            currentFilter = category;
+            
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const filteredPosts = filterPostsByCategory(category);
+            renderPosts(filteredPosts);
+        }
+
+        function filterPostsByCategory(category) {
+            if (category === 'all') return posts;
+            if (category === 'trending') return posts.filter(p => p.likes > 50);
+            if (category === 'recent') return posts.filter(p => Date.now() - p.timestamp < 24 * 60 * 60 * 1000);
+            return posts.filter(p => p.category === category);
+        }
+
+        function sharePost(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                navigator.clipboard.writeText(`Check out this research: "${post.title}" on LabsLaunch Community`);
+                alert('Post link copied to clipboard!');
+            }
+        }
+
+        // Handle new post form submission
+        document.getElementById('newPostForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('postTitle').value;
+            const category = document.getElementById('postCategory').value;
+            const content = document.getElementById('postContent').value;
+            const tags = document.getElementById('postTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
+            
+            const newPost = {
+                id: posts.length + 1,
+                userId: currentUser.id,
+                title: title,
+                content: content,
+                category: category,
+                tags: tags,
+                timestamp: new Date(),
+                likes: 0,
+                comments: []
+            };
+            
+            posts.unshift(newPost); // Add to beginning of array
+            renderPosts(filterPostsByCategory(currentFilter));
+            closeModal('newPostModal');
+            
+            // Reset form
+            document.getElementById('newPostForm').reset();
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            if (searchTerm.trim() === '') {
+                renderPosts(filterPostsByCategory(currentFilter));
+                return;
+            }
+            
+            const filteredPosts = posts.filter(post => 
+                post.title.toLowerCase().includes(searchTerm) ||
+                post.content.toLowerCase().includes(searchTerm) ||
+                post.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
+                users.find(u => u.id === post.userId)?.name.toLowerCase().includes(searchTerm)
+            );
+            
+            renderPosts(filteredPosts);
+        });
+
+        // Initialize the page
+        renderPosts();
+    </script>
+</body>
+</html>
